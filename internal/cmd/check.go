@@ -57,7 +57,7 @@ func checkPR(cmd *cobra.Command, cfg *config.Config, pr int64) error {
 		return err
 	}
 
-	fmt.Fprintf(cmd.OutOrStdout(), "changelog entry for PR #%d is valid (%d entr%s)\n", pr, count, entryCount(count))
+	fmt.Fprintf(cmd.OutOrStdout(), "changelog entry for PR #%d is valid (%s)\n", pr, entryCount(count))
 	return nil
 }
 
