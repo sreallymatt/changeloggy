@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/sreallymatt/changeloggy/pkg/config"
@@ -29,9 +30,11 @@ Checks for:
 
 			if errs := cfg.Validate(); len(errs) > 0 {
 				msg := fmt.Sprintf("configuration (%s) is invalid:", *configPath)
+				var msgSb strings.Builder
 				for _, e := range errs {
-					msg += "\n  " + e.Error()
+					msgSb.WriteString("\n  " + e.Error())
 				}
+				msg += msgSb.String()
 				return fmt.Errorf("%s", msg)
 			}
 

@@ -6,12 +6,11 @@ import (
 )
 
 type Kind struct {
-	Name     string      `hcl:"name,label"`
-	Heading  *string     `hcl:"heading,optional"`
-	Priority *int        `hcl:"priority,optional"`
-	Types    []EntryType `hcl:"type,block"`
-
+	Heading  *string `hcl:"heading,optional"`
+	Priority *int    `hcl:"priority,optional"`
 	TypesMap map[string]EntryType
+	Name     string      `hcl:"name,label"`
+	Types    []EntryType `hcl:"type,block"`
 }
 
 func (k *Kind) ValidateTypes(names map[string][]string) (e []error) {

@@ -32,9 +32,9 @@ func NewTypesCommand(configPath *string) *cobra.Command {
 
 				for _, t := range k.Types {
 					line := strings.Builder{}
-					line.WriteString(fmt.Sprintf("  %-24s", t.Name))
+					fmt.Fprintf(&line, "  %-24s", t.Name)
 					if t.Example != nil {
-						line.WriteString(fmt.Sprintf("  e.g. %s", *t.Example))
+						fmt.Fprintf(&line, "  e.g. %s", *t.Example)
 					}
 					fmt.Fprintln(cmd.OutOrStdout(), line.String())
 				}

@@ -79,7 +79,7 @@ Run 'changeloggy types' to see all available entry types.`,
 			newContent := hclwrite.NewFile()
 			gohcl.EncodeIntoBody(chs.WriteEntries(), newContent.Body())
 
-			if err := os.WriteFile(filePath, hclwrite.Format(newContent.Bytes()), 0o644); err != nil {
+			if err := os.WriteFile(filePath, hclwrite.Format(newContent.Bytes()), 0o600); err != nil {
 				return fmt.Errorf("writing to file (%s): %w", filePath, err)
 			}
 

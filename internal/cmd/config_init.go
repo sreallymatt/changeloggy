@@ -35,7 +35,7 @@ func NewConfigInitCommand(configPath *string) *cobra.Command {
 				return fmt.Errorf("configuration file (%s) already exists, to overwrite it, use `--force`", path)
 			}
 
-			if err := os.WriteFile(path, defaultConfigContent, 0o644); err != nil {
+			if err := os.WriteFile(path, defaultConfigContent, 0o600); err != nil {
 				return err
 			}
 

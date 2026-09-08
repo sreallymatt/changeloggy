@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/hashicorp/go-azure-helpers/lang/pointer"
 	"github.com/hashicorp/hcl/v2/hclsimple"
 )
 
@@ -19,24 +18,21 @@ const (
 )
 
 type TypeEntry struct {
-	Kind      Kind
 	EntryType EntryType
+	Kind      Kind
 }
 
 type Config struct {
-	ChangelogFile           string   `hcl:"changelog_file"`
-	DefaultVersionIncrement string   `hcl:"default_version_increment"`
+	ArchiveEntries          *bool   `hcl:"archive_entries,optional"`
+	ArchivePath             *string `hcl:"archive_path,optional"`
+	EntriesPath             *string `hcl:"entries_path,optional"`
+	KindsMap                map[string]Kind
+	Types                   map[string]TypeEntry
+	ChangelogFile           string `hcl:"changelog_file"`
+	DefaultVersionIncrement string `hcl:"default_version_increment"`
+	ConfigDir               string
 	Format                  []Format `hcl:"format,block"`
 	Kinds                   []Kind   `hcl:"kind,block"`
-
-	ArchiveEntries *bool   `hcl:"archive_entries,optional"`
-	ArchivePath    *string `hcl:"archive_path,optional"`
-	EntriesPath    *string `hcl:"entries_path,optional"`
-
-	KindsMap map[string]Kind
-	Types    map[string]TypeEntry
-
-	ConfigDir string
 }
 
 func Load(configPath string) (*Config, error) {
@@ -58,9 +54,11 @@ func LoadAndValidate(configPath string) (*Config, error) {
 
 	if errs := cfg.Validate(); len(errs) > 0 {
 		msg := fmt.Sprintf("configuration (%s) is invalid:", configPath)
+		var msgSb strings.Builder
 		for _, e := range errs {
-			msg += "\n  " + e.Error()
+			msgSb.WriteString("\n  " + e.Error())
 		}
+		msg += msgSb.String()
 		return nil, fmt.Errorf("%s", msg)
 	}
 
@@ -79,16 +77,16 @@ func ParseConfig(configPath string) (*Config, error) {
 
 	c.ConfigDir = filepath.Dir(configPath)
 
-	if c.Format == nil || len(c.Format) == 0 {
+	if len(c.Format) == 0 {
 		c.Format = append(c.Format, NewDefaultFormat())
 	}
 
 	if c.Format[0].DateFormat == nil {
-		c.Format[0].DateFormat = pointer.To(defaultDateFormat)
+		c.Format[0].DateFormat = new(defaultDateFormat)
 	}
 
 	if c.Format[0].Template == nil {
-		c.Format[0].Template = pointer.To(defaultTemplate)
+		c.Format[0].Template = new(defaultTemplate)
 	}
 
 	km := make(map[string]Kind)
@@ -167,7 +165,7 @@ func (c *Config) ValidateKinds() (e []error) {
 		}
 	}
 
-	return
+	return e
 }
 
 func (c *Config) EntriesPathOrDefault() string {
@@ -202,7 +200,7 @@ func (c *Config) ResolveEntryType(name string) (TypeEntry, error) {
 	return TypeEntry{}, fmt.Errorf("unknown type `%s`, run `changeloggy types` to see available types", name)
 }
 
-func (c *Config) EntryTypePriority(kindName string, typeName string) int {
+func (c *Config) EntryTypePriority(kindName, typeName string) int {
 	k, ok := c.KindsMap[kindName]
 	if !ok {
 		return math.MaxInt32

@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"path/filepath"
 	"regexp"
 
 	"github.com/Masterminds/semver/v3"
@@ -36,7 +37,7 @@ func (c *Config) latestVersion() (*semver.Version, error) {
 		return v, nil
 	}
 
-	f, err := os.Open(cl)
+	f, err := os.Open(filepath.Clean(cl))
 	if err != nil {
 		return nil, fmt.Errorf("opening changelog (%s): %w", cl, err)
 	}
