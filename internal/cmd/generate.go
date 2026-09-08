@@ -76,6 +76,10 @@ func NewGenerateCommand(configPath *string) *cobra.Command {
 				if err := archiveEntries(cfg, entriesDir); err != nil {
 					return fmt.Errorf("archiving entries: %w", err)
 				}
+			} else {
+				if err := removeEntries(entriesDir); err != nil {
+					return fmt.Errorf("removing entries: %w", err)
+				}
 			}
 
 			fmt.Fprintf(cmd.OutOrStdout(), "Generated %s -> %s\n", version, changelogPath)
@@ -277,6 +281,25 @@ func archiveEntries(cfg *config.Config, entriesDir string) error {
 		dst := filepath.Join(archivePath, f.Name())
 		if err := moveFile(src, dst); err != nil {
 			return fmt.Errorf("archiving file (%s): %w", f.Name(), err)
+		}
+	}
+
+	return nil
+}
+
+func removeEntries(entriesDir string) error {
+	files, err := os.ReadDir(entriesDir)
+	if err != nil {
+		return fmt.Errorf("reading entries directory (%s): %w", entriesDir, err)
+	}
+
+	for _, f := range files {
+		if f.IsDir() || !strings.HasSuffix(f.Name(), ".hcl") {
+			continue
+		}
+
+		if err := os.Remove(filepath.Join(entriesDir, f.Name())); err != nil {
+			return fmt.Errorf("removing file (%s): %w", f.Name(), err)
 		}
 	}
 
