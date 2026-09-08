@@ -6,10 +6,10 @@ import (
 )
 
 type EntryType struct {
-	Name     string  `hcl:"name,label"`
 	Example  *string `hcl:"example,optional"`
 	Regex    *string `hcl:"regex,optional"`
 	Priority *int    `hcl:"priority,optional"`
+	Name     string  `hcl:"name,label"`
 }
 
 func (t EntryType) Validate(kindName string) (errors []error) {

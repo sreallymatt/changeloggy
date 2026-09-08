@@ -6,10 +6,10 @@ import (
 )
 
 type EntryData struct {
-	PR   int64
 	Body string
 	Type string
 	Kind string
+	PR   int64
 }
 
 type KindData struct {

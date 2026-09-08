@@ -3,8 +3,6 @@ package config
 import (
 	"fmt"
 	"text/template"
-
-	"github.com/hashicorp/go-azure-helpers/lang/pointer"
 )
 
 const defaultDateFormat = "January 2, 2006"
@@ -25,8 +23,8 @@ var defaultTemplate = `## {{ .Version }} ({{ .Date }})
 
 func NewDefaultFormat() Format {
 	return Format{
-		DateFormat: pointer.To(defaultDateFormat),
-		Template:   pointer.To(defaultTemplate),
+		DateFormat: new(defaultDateFormat),
+		Template:   new(defaultTemplate),
 	}
 }
 

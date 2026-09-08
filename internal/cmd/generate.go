@@ -50,14 +50,14 @@ func NewGenerateCommand(configPath *string) *cobra.Command {
 			}
 
 			if len(grouped) == 0 {
-				return fmt.Errorf("no changelog entries found, nothing to generate")
+				return errors.New("no changelog entries found, nothing to generate")
 			}
 
 			changelogPath := cfg.ChangelogFilePath()
 
 			var existing []byte
 			if _, err := os.Stat(changelogPath); !errors.Is(err, os.ErrNotExist) {
-				existing, err = os.ReadFile(changelogPath)
+				existing, err = os.ReadFile(filepath.Clean(changelogPath))
 				if err != nil {
 					return fmt.Errorf("reading file (%s): %w", changelogPath, err)
 				}
@@ -145,7 +145,7 @@ func parseChangesFromFile(cmd *cobra.Command, cfg *config.Config, directory stri
 
 	pr, err := prFromFilename(file.Name())
 	if err != nil {
-		fmt.Fprintf(cmd.ErrOrStderr(), "warning: skipping %s: filename is not a valid PR number\n", file.Name())
+		fmt.Fprintf(cmd.ErrOrStderr(), "warning: skipping %s: filename is not a valid PR number: %v\n", file.Name(), err)
 		return nil
 	}
 
@@ -264,7 +264,7 @@ func formatWithTemplate(cfg *config.Config, grouped map[string]map[int]*changes.
 func archiveEntries(cfg *config.Config, entriesDir string) error {
 	archivePath := cfg.ArchivePathOrDefault()
 
-	if err := os.MkdirAll(archivePath, 0o755); err != nil {
+	if err := os.MkdirAll(archivePath, 0o700); err != nil {
 		return fmt.Errorf("creating archive directory (%s): %w", archivePath, err)
 	}
 
@@ -311,25 +311,25 @@ func moveFile(src, dst string) error {
 		return nil
 	}
 
-	in, err := os.Open(src)
+	in, err := os.Open(filepath.Clean(src))
 	if err != nil {
 		return fmt.Errorf("opening source file: %w", err)
 	}
 	defer in.Close()
 
-	out, err := os.Create(dst)
+	out, err := os.Create(filepath.Clean(dst))
 	if err != nil {
 		return fmt.Errorf("creating destination file: %w", err)
 	}
 
 	if _, err := io.Copy(out, in); err != nil {
-		out.Close()
-		os.Remove(dst)
+		_ = out.Close()
+		_ = os.Remove(dst)
 		return fmt.Errorf("copying file: %w", err)
 	}
 
 	if err := out.Close(); err != nil {
-		os.Remove(dst)
+		_ = os.Remove(dst)
 		return fmt.Errorf("closing destination file: %w", err)
 	}
 
