@@ -40,3 +40,6 @@ checksum:
 
 changelog:
   disable: true
+
+release:
+  mode: replace
