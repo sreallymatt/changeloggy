@@ -14,10 +14,10 @@ import (
 	"github.com/hashicorp/go-azure-helpers/lang/pointer"
 	"github.com/spf13/cobra"
 	"github.com/sreallymatt/changeloggy/internal/changes"
+	"github.com/sreallymatt/changeloggy/internal/config"
 	"github.com/sreallymatt/changeloggy/internal/hclparse"
+	"github.com/sreallymatt/changeloggy/internal/templatehelper"
 	"github.com/sreallymatt/changeloggy/internal/util"
-	"github.com/sreallymatt/changeloggy/pkg/config"
-	"github.com/sreallymatt/changeloggy/pkg/templatehelper"
 )
 
 const root string = "__ROOT"

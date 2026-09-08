@@ -10,9 +10,9 @@ import (
 	"github.com/hashicorp/hcl/v2/hclwrite"
 	"github.com/spf13/cobra"
 	"github.com/sreallymatt/changeloggy/internal/changes"
+	"github.com/sreallymatt/changeloggy/internal/config"
 	"github.com/sreallymatt/changeloggy/internal/hclparse"
 	"github.com/sreallymatt/changeloggy/internal/util"
-	"github.com/sreallymatt/changeloggy/pkg/config"
 )
 
 func NewAddCommand(configPath *string) *cobra.Command {

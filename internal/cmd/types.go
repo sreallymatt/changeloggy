@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-	"github.com/sreallymatt/changeloggy/pkg/config"
+	"github.com/sreallymatt/changeloggy/internal/config"
 )
 
 func NewTypesCommand(configPath *string) *cobra.Command {
