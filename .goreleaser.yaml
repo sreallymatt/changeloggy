@@ -39,7 +39,4 @@ checksum:
   name_template: "checksums.txt"
 
 changelog:
-  filters:
-    exclude:
-      - "^Bump "
-      - "merge main"
+  disable: true
