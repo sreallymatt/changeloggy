@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/sreallymatt/changeloggy/pkg/config"
+	"github.com/sreallymatt/changeloggy/internal/config"
 )
 
 //go:embed files/default_config.hcl

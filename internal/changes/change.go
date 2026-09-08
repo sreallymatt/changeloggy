@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"regexp"
 
-	"github.com/sreallymatt/changeloggy/pkg/config"
+	"github.com/sreallymatt/changeloggy/internal/config"
 )
 
 type Entries struct {

@@ -8,8 +8,8 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/sreallymatt/changeloggy/internal/config"
 	"github.com/sreallymatt/changeloggy/internal/hclparse"
-	"github.com/sreallymatt/changeloggy/pkg/config"
 )
 
 func NewCheckCommand(configPath *string) *cobra.Command {

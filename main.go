@@ -8,7 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/sreallymatt/changeloggy/internal/cmd"
-	"github.com/sreallymatt/changeloggy/pkg/config"
+	"github.com/sreallymatt/changeloggy/internal/config"
 )
 
 //go:embed VERSION
