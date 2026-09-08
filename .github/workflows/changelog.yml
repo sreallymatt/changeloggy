@@ -1,0 +1,29 @@
+name: changelog
+
+on:
+  pull_request:
+    types:
+      - "opened"
+      - "synchronize"
+      - "labeled"
+      - "unlabeled"
+    branches:
+      - "main"
+
+permissions: {}
+
+jobs:
+  changelog:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: .go-version
+      - name: Install changeloggy
+        run: go install github.com/sreallymatt/changeloggy@v0.1.0
+      - name: Check changelog entry
+        if: "!contains(github.event.pull_request.labels.*.name, 'no-changelog-needed')"
+        run: changeloggy check --pr ${{ github.event.pull_request.number }}
