@@ -1,18 +1,15 @@
 package main
 
 import (
-	_ "embed"
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/sreallymatt/changeloggy/internal/cmd"
 	"github.com/sreallymatt/changeloggy/internal/config"
 )
 
-//go:embed VERSION
-var cliVersion string
+var version string
 
 func main() {
 	var configPath string
@@ -20,7 +17,7 @@ func main() {
 	root := &cobra.Command{
 		Use:           "changeloggy",
 		Short:         "Changelog management with optional entry format validation",
-		Version:       strings.TrimSpace(cliVersion), // TODO: remove this?
+		Version:       version,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 	}
