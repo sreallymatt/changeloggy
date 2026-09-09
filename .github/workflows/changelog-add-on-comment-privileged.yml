@@ -1,0 +1,82 @@
+name: changelog-add-on-comment-privileged
+
+on:
+  workflow_run:
+    workflows:
+      - "changelog-add-on-comment"
+    types:
+      - "completed"
+
+permissions: {}
+
+jobs:
+  changelog:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Download event metadata
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        with:
+          path: artifacts/
+          github-token: ${{ github.token }}
+          run-id: ${{ github.event.workflow_run.id }}
+          merge-multiple: true
+
+      - name: Validate PR number
+        id: meta
+        run: |
+          IFS= read -r pr_number < artifacts/pr-number
+          if ! [[ "$pr_number" =~ ^[0-9]+$ ]]; then
+            echo "Invalid pr-number" >&2
+            exit 1
+          fi
+          echo "pr-number=$pr_number" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout PR branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ steps.meta.outputs.pr-number }}
+        run: gh pr checkout "$PR_NUMBER"
+
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: .go-version
+
+      - name: Install changeloggy
+        run: go install github.com/sreallymatt/changeloggy@v0.1.0
+
+      - name: Parse and add changelog entries
+        env:
+          PR_NUMBER: ${{ steps.meta.outputs.pr-number }}
+        run: |
+          count=0
+          while IFS= read -r line; do
+            [[ -z "$line" ]] && continue
+            if [[ "$line" =~ ^\[([^\]]+)\]\ (.+)$ ]]; then
+              type="${BASH_REMATCH[1]}"
+              body="${BASH_REMATCH[2]}"
+              (( count++ ))
+              if (( count > 10 )); then
+                echo "Maximum of 10 entries exceeded, ignoring remainder" >&2
+                break
+              fi
+              changeloggy add --pr "$PR_NUMBER" --type "$type" "$body"
+            fi
+          done < <(tail -n +2 artifacts/comment-body)
+
+      - name: Commit and push changelog entries to PR branch
+        env:
+          PR_NUMBER: ${{ steps.meta.outputs.pr-number }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .changelog/
+          git diff --cached --quiet || git commit -m "changelog: add entries for PR #${PR_NUMBER}"
+          git push

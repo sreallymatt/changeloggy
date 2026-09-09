@@ -1,0 +1,43 @@
+name: changelog-add-on-comment
+
+on:
+  issue_comment:
+    types:
+      - "created"
+
+permissions: {}
+
+jobs:
+  save-comment:
+    if: >
+      github.event.issue.pull_request != null &&
+      startsWith(github.event.comment.body, '/changelog')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write
+    steps:
+      - name: Acknowledge comment
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          script: |
+            await github.rest.reactions.createForIssueComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: context.payload.comment.id,
+              content: "eyes",
+            })
+
+      - name: Save event metadata
+        env:
+          PR_NUMBER: ${{ github.event.issue.number }}
+          COMMENT_BODY: ${{ github.event.comment.body }}
+        run: |
+          mkdir -p artifacts
+          echo "$PR_NUMBER" > artifacts/pr-number
+          printf '%s' "$COMMENT_BODY" | head -c 2048 > artifacts/comment-body
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: changelog-${{ github.event.issue.number }}-${{ github.run_id }}
+          path: artifacts/

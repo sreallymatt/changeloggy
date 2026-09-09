@@ -42,7 +42,7 @@ kind "bug" {
   }
 
   type "generic-bug" {
-    regex    = "^afix .*$"
+    regex    = "^fix .*$"
     example  = "fix a panic caused by dark magic"
     priority = 2
   }
