@@ -13,6 +13,7 @@ jobs:
       github.event.issue.pull_request != null &&
       startsWith(github.event.comment.body, '/changelog')
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       issues: write
     steps:
@@ -34,9 +35,9 @@ jobs:
         run: |
           mkdir -p artifacts
           echo "$PR_NUMBER" > artifacts/pr-number
-          printf '%s' "$COMMENT_BODY" > artifacts/comment-body
+          printf '%s' "$COMMENT_BODY" | head -c 2048 > artifacts/comment-body
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: changelog-${{ github.event.issue.number }}
+          name: changelog-${{ github.event.issue.number }}-${{ github.run_id }}
           path: artifacts/
