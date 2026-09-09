@@ -1,6 +1,6 @@
 # changeloggy
 
-Test from fork
+Test from fork on branch
 
 A CLI tool for managing changelog entries with optional entry format validation.
 
