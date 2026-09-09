@@ -61,5 +61,7 @@ jobs:
                 "```",
                 types,
                 "```",
+                "",
+                "If this PR does not require a changelog entry, add the `no-changelog-needed` label."
               ].join("\n"),
             })
