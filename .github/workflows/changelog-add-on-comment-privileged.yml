@@ -1,0 +1,65 @@
+name: changelog-add-on-comment-push
+
+on:
+  workflow_run:
+    workflows:
+      - "changelog-add-on-comment"
+    types:
+      - "completed"
+
+permissions: {}
+
+jobs:
+  changelog:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Download event metadata
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        with:
+          path: artifacts/
+          github-token: ${{ github.token }}
+          run-id: ${{ github.event.workflow_run.id }}
+          merge-multiple: true
+
+      - name: Read event metadata
+        id: meta
+        run: |
+          pr_number=$(cat artifacts/pr-number)
+          echo "pr-number=$pr_number" >> "$GITHUB_OUTPUT"
+          branch=$(gh pr view "$pr_number" --json headRefName -q .headRefName)
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: .go-version
+
+      - name: Install changeloggy
+        run: go install github.com/sreallymatt/changeloggy@v0.1.0
+
+      - name: Parse and add changelog entries
+        env:
+          PR_NUMBER: ${{ steps.meta.outputs.pr-number }}
+        run: |
+          tail -n +2 artifacts/comment-body | while IFS= read -r line; do
+            [[ -z "$line" ]] && continue
+            if [[ "$line" =~ ^\[([^\]]+)\]\ (.+)$ ]]; then
+              type="${BASH_REMATCH[1]}"
+              body="${BASH_REMATCH[2]}"
+              changeloggy add --pr "$PR_NUMBER" --type "$type" "$body"
+            fi
+          done
+
+      - name: Commit and push changelog entries to PR branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .changelog/
+          git diff --cached --quiet || git commit -m "changelog: add entries for PR #${{ steps.meta.outputs.pr-number }}"
+          git push origin HEAD:refs/heads/${{ steps.meta.outputs.branch }}
