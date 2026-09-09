@@ -8,3 +8,6 @@ change "internal" {
 change "cli-bug" {
   body = "cli: `generate` - fix an issue with something"
 }
+change "cli-bug" {
+  body = "cli: `generate` - fix an issue with something"
+}
