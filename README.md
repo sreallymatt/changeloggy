@@ -1,5 +1,7 @@
 # changeloggy
 
+a change made for testing purposes
+
 A CLI tool for managing changelog entries with optional entry format validation.
 
 ## Installation
