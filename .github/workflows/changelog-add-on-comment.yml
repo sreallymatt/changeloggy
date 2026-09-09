@@ -28,10 +28,13 @@ jobs:
             })
 
       - name: Save event metadata
+        env:
+          PR_NUMBER: ${{ github.event.issue.number }}
+          COMMENT_BODY: ${{ github.event.comment.body }}
         run: |
           mkdir -p artifacts
-          echo "${{ github.event.issue.number }}" > artifacts/pr-number
-          printf '%s' "${{ github.event.comment.body }}" > artifacts/comment-body
+          echo "$PR_NUMBER" > artifacts/pr-number
+          printf '%s' "$COMMENT_BODY" > artifacts/comment-body
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:

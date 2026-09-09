@@ -57,9 +57,12 @@ jobs:
           done
 
       - name: Commit and push changelog entries to PR branch
+        env:
+          PR_NUMBER: ${{ steps.meta.outputs.pr-number }}
+          BRANCH: ${{ steps.meta.outputs.branch }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add .changelog/
-          git diff --cached --quiet || git commit -m "changelog: add entries for PR #${{ steps.meta.outputs.pr-number }}"
-          git push origin HEAD:refs/heads/${{ steps.meta.outputs.branch }}
+          git diff --cached --quiet || git commit -m "changelog: add entries for PR #${PR_NUMBER}"
+          git push origin HEAD:refs/heads/"$BRANCH"
