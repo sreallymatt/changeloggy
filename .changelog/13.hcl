@@ -5,3 +5,6 @@ change "cli-bug" {
 change "internal" {
   body = "internal: `templatehelpers` - add something\r"
 }
+change "cli-bug" {
+  body = "cli: `generate` - fix an issue with something"
+}
