@@ -62,7 +62,7 @@ jobs:
             if [[ "$line" =~ ^\[([^\]]+)\]\ (.+)$ ]]; then
               type="${BASH_REMATCH[1]}"
               body="${BASH_REMATCH[2]}"
-              (( count++ ))
+              count=$(( count + 1 ))
               if (( count > 10 )); then
                 echo "Maximum of 10 entries exceeded, ignoring remainder" >&2
                 break
