@@ -21,6 +21,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Download event metadata
+        id: download
         uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
         with:
           path: artifacts/
@@ -88,7 +89,7 @@ jobs:
           git push
 
       - name: Comment on failure
-        if: failure()
+        if: failure() && steps.download.outcome == 'success'
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
