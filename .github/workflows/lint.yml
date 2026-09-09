@@ -9,7 +9,7 @@ on:
       - "opened"
       - "synchronize"
     paths:
-      - ".github/workflows/**"
+      - ".github/workflows/lint.yml"
       - "**.go"
       - ".golangci.yml"
 
