@@ -30,15 +30,17 @@ jobs:
             })
 
       - name: Save event metadata
-        env:
-          PR_NUMBER: ${{ github.event.issue.number }}
-          COMMENT_BODY: ${{ github.event.comment.body }}
-        run: |
-          mkdir -p artifacts
-          echo "$PR_NUMBER" > artifacts/pr-number
-          printf '%s' "$COMMENT_BODY" | head -c 2048 > artifacts/comment-body
-          first_line=$(head -1 artifacts/comment-body)
-          [[ "$first_line" == "/changelog replace" ]] && echo "true" > artifacts/replace || echo "false" > artifacts/replace
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          script: |
+            const fs = require('fs')
+            const body = context.payload.comment.body
+            const prNumber = context.payload.issue.number
+            const replace = body.startsWith('/changelog replace')
+            fs.mkdirSync('artifacts', { recursive: true })
+            fs.writeFileSync('artifacts/pr-number', String(prNumber))
+            fs.writeFileSync('artifacts/comment-body', body.slice(0, 2048))
+            fs.writeFileSync('artifacts/replace', String(replace))
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
