@@ -26,4 +26,16 @@ jobs:
         run: go install github.com/sreallymatt/changeloggy@v0.1.0
       - name: Check changelog entry
         if: "!contains(github.event.pull_request.labels.*.name, 'no-changelog-needed')"
+        id: check
         run: changeloggy check --pr ${{ github.event.pull_request.number }}
+      - name: Save types table on failure
+        if: failure() && steps.check.outcome == 'failure'
+        run: |
+          mkdir -p artifacts
+          echo "${{ github.event.pull_request.number }}" > artifacts/pr-number
+          changeloggy types --table > artifacts/types-table
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: failure() && steps.check.outcome == 'failure'
+        with:
+          name: changelog-check-failed-${{ github.event.pull_request.number }}-${{ github.run_id }}
+          path: artifacts/
