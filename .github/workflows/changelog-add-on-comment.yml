@@ -37,6 +37,8 @@ jobs:
           mkdir -p artifacts
           echo "$PR_NUMBER" > artifacts/pr-number
           printf '%s' "$COMMENT_BODY" | head -c 2048 > artifacts/comment-body
+          first_line=$(head -1 artifacts/comment-body)
+          [[ "$first_line" == "/changelog replace" ]] && echo "true" > artifacts/replace || echo "false" > artifacts/replace
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
