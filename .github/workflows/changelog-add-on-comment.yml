@@ -39,7 +39,7 @@ jobs:
             const replace = body.startsWith('/changelog replace')
             fs.mkdirSync('artifacts', { recursive: true })
             fs.writeFileSync('artifacts/pr-number', String(prNumber) + '\n')
-            fs.writeFileSync('artifacts/comment-body', body.slice(0, 2048))
+            fs.writeFileSync('artifacts/comment-body', body.slice(0, 2048) + '\n')
             fs.writeFileSync('artifacts/replace', String(replace) + '\n')
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
