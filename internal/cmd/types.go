@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/sreallymatt/changeloggy/internal/config"
+	"github.com/sreallymatt/changeloggy/internal/util"
 )
 
 func NewTypesCommand(configPath *string) *cobra.Command {
@@ -76,7 +77,7 @@ func printTypesTable(cmd *cobra.Command, cfg *config.Config) error {
 		for _, t := range k.Types {
 			example := ""
 			if t.Example != nil {
-				example = *t.Example
+				example = util.Code(*t.Example)
 			}
 			fmt.Fprintf(cmd.OutOrStdout(), "| %s | %s | %s |\n", heading, t.Name, example)
 		}
