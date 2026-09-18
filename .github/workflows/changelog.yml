@@ -34,6 +34,7 @@ jobs:
         run: changeloggy check --pr ${{ github.event.pull_request.number }}
 
       - name: Save PR number
+        if: always()
         run: |
           mkdir -p artifacts
           echo "${{ github.event.pull_request.number }}" > artifacts/pr-number
