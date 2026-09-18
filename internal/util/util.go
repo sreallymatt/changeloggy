@@ -17,7 +17,7 @@ func EnsureDir(path string) error {
 
 // Code wraps a value in backticks.
 // If the value contains backticks, it adds additional ones to ensure it renders properly as a code block.
-// If the value begins or ends with backticks, it adds the requred spacing ensure it renders properly as a code block.
+// If the value begins or ends with backticks, it adds the required spacing ensure it renders properly as a code block.
 func Code(value string) string {
 	delimiter := "`"
 	for strings.Contains(value, delimiter) {
