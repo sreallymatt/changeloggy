@@ -1,3 +1,15 @@
+## v0.3.0 (September 21, 2026)
+
+Improvements:
+
+- cli: `add` - entries can now be added in `hcl`, `yml`, or `md` formats ([#34](https://github.com/sreallymatt/changeloggy/pull/34))
+- cli: `check` - checks for entries in `hcl`, `yml`, or `md` formats ([#34](https://github.com/sreallymatt/changeloggy/pull/34))
+- cli: `generate` - parses entries in `hcl`, `yml`, or `md` formats to generate the changelog ([#34](https://github.com/sreallymatt/changeloggy/pull/34))
+
+Bugs:
+
+- cli: `types` - fix example output for the `--table` flag, preserving the raw string by wrapping it backticks ([#36](https://github.com/sreallymatt/changeloggy/pull/36))
+
 ## v0.2.0 (September 18, 2026)
 
 Improvements:
