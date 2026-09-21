@@ -5,11 +5,10 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/sreallymatt/changeloggy/internal/config"
-	"github.com/sreallymatt/changeloggy/internal/hclparse"
+	"github.com/sreallymatt/changeloggy/internal/entryfile"
 )
 
 func NewCheckCommand(configPath *string) *cobra.Command {
@@ -43,13 +42,16 @@ All entry types must be valid and all bodies must match their configured regex.`
 }
 
 func checkPR(cmd *cobra.Command, cfg *config.Config, pr int64) error {
-	filePath := filepath.Join(cfg.EntriesPathOrDefault(), fmt.Sprintf("%d.hcl", pr))
+	entriesDir := cfg.EntriesPathOrDefault()
 
-	if _, err := os.Stat(filePath); err != nil {
-		if errors.Is(err, os.ErrNotExist) {
-			return fmt.Errorf("no changelog entry found for PR #%d (expected %s)", pr, filePath)
-		}
-		return fmt.Errorf("checking for changelog entry file (%s): %w", filePath, err)
+	filePath, err := entryfile.ForPR(entriesDir, pr)
+	if err != nil {
+		return err
+	}
+
+	if filePath == "" {
+		expected := filepath.Join(entriesDir, fmt.Sprintf("%d.%s", pr, cfg.EntryFormatOrDefault()))
+		return fmt.Errorf("no changelog entry found for PR #%d (expected %s)", pr, expected)
 	}
 
 	count, err := validateFile(cfg, filePath)
@@ -64,40 +66,37 @@ func checkPR(cmd *cobra.Command, cfg *config.Config, pr int64) error {
 func checkAll(cmd *cobra.Command, cfg *config.Config) error {
 	entriesDir := cfg.EntriesPathOrDefault()
 
-	files, err := os.ReadDir(entriesDir)
+	files, skipped, err := entryfile.List(entriesDir)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
 			return fmt.Errorf("entries directory not found (%s)", entriesDir)
 		}
-		return fmt.Errorf("reading entries directory (%s): %w", entriesDir, err)
+		return err
 	}
 
-	var hclFiles []string
-	for _, f := range files {
-		if !f.IsDir() && strings.HasSuffix(f.Name(), ".hcl") {
-			hclFiles = append(hclFiles, filepath.Join(entriesDir, f.Name()))
-		}
+	for _, name := range skipped {
+		fmt.Fprintf(cmd.ErrOrStderr(), "warning: skipping %s: filename is not a valid PR number\n", name)
 	}
 
-	if len(hclFiles) == 0 {
+	if len(files) == 0 {
 		return fmt.Errorf("no changelog entry files found in %s", entriesDir)
 	}
 
 	totalEntries := 0
-	for _, path := range hclFiles {
-		count, err := validateFile(cfg, path)
+	for _, f := range files {
+		count, err := validateFile(cfg, f.Path)
 		if err != nil {
 			return err
 		}
 		totalEntries += count
 	}
 
-	fmt.Fprintf(cmd.OutOrStdout(), "all files valid (%s across %d file(s))\n", entryCount(totalEntries), len(hclFiles))
+	fmt.Fprintf(cmd.OutOrStdout(), "all files valid (%s across %d file(s))\n", entryCount(totalEntries), len(files))
 	return nil
 }
 
 func validateFile(cfg *config.Config, filePath string) (int, error) {
-	entries, err := hclparse.EntryFile(filePath)
+	entries, err := entryfile.Read(filePath)
 	if err != nil {
 		return 0, err
 	}

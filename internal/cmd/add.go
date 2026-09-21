@@ -1,18 +1,14 @@
 package cmd
 
 import (
-	"bytes"
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 
-	"github.com/hashicorp/hcl/v2/gohcl"
-	"github.com/hashicorp/hcl/v2/hclwrite"
 	"github.com/spf13/cobra"
 	"github.com/sreallymatt/changeloggy/internal/changes"
 	"github.com/sreallymatt/changeloggy/internal/config"
-	"github.com/sreallymatt/changeloggy/internal/hclparse"
+	"github.com/sreallymatt/changeloggy/internal/entryfile"
 	"github.com/sreallymatt/changeloggy/internal/util"
 )
 
@@ -28,7 +24,12 @@ func NewAddCommand(configPath *string) *cobra.Command {
 
 Adds a new changelog entry for a pull request.
 
-If no changelog file exists for the pull request number, one will be created.
+If the pull request already has a changelog file, the entry is added to it in
+whatever format it is in. Otherwise one is created using the configured
+'entry_format' (hcl, md, or yml).
+
+With --replace, the pull request's existing changelog file is replaced by a new
+one in the configured 'entry_format'.
 
 Run 'changeloggy types' to see all available entry types.`,
 		Args: cobra.ExactArgs(1),
@@ -55,33 +56,40 @@ Run 'changeloggy types' to see all available entry types.`,
 				return fmt.Errorf("invalid changelog entry: %w", err)
 			}
 
-			filePath := filepath.Join(cfg.EntriesPathOrDefault(), fmt.Sprintf("%d.hcl", pr))
+			entriesDir := cfg.EntriesPathOrDefault()
+
+			existingPath, err := entryfile.ForPR(entriesDir, pr)
+			if err != nil {
+				return err
+			}
+
+			filePath := filepath.Join(entriesDir, fmt.Sprintf("%d.%s", pr, cfg.EntryFormatOrDefault()))
+
+			chs := changes.Entries{}
+			if existingPath != "" && !replace {
+				existing, err := entryfile.Read(existingPath)
+				if err != nil {
+					return err
+				}
+				chs = *existing
+				filePath = existingPath
+			}
 
 			if err := util.EnsureDir(filePath); err != nil {
 				return err
 			}
 
-			_, err = os.Stat(filePath)
-			if err != nil && !errors.Is(err, os.ErrNotExist) {
-				return fmt.Errorf("checking for presence of file (%s): %w", filePath, err)
-			}
-
-			chs := changes.Entries{}
-			if !replace && !errors.Is(err, os.ErrNotExist) {
-				existing, err := hclparse.EntryFile(filePath)
-				if err != nil {
-					return err
-				}
-				chs = *existing
-			}
-
 			chs.Changes = append(chs.Changes, ch)
 
-			newContent := hclwrite.NewFile()
-			gohcl.EncodeIntoBody(chs.WriteEntries(), newContent.Body())
+			if err := entryfile.Write(filePath, &chs); err != nil {
+				return err
+			}
 
-			if err := os.WriteFile(filePath, bytes.TrimLeft(hclwrite.Format(newContent.Bytes()), "\n"), 0o600); err != nil {
-				return fmt.Errorf("writing to file (%s): %w", filePath, err)
+			// a replaced file in another format is only removed once the new one is written, so a failed write loses nothing
+			if existingPath != "" && existingPath != filePath {
+				if err := os.Remove(existingPath); err != nil {
+					return fmt.Errorf("removing replaced changelog entry file (%s): %w", existingPath, err)
+				}
 			}
 
 			fmt.Fprintf(cmd.OutOrStdout(), "added `%s` entry to `%s`\n", entryType, filePath)
