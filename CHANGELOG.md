@@ -1,3 +1,13 @@
+## 0.3.1 (October 1, 2026)
+
+Bugs:
+
+- fix forced `v` prefix on `Version` provided to template
+
+Dependencies:
+
+- `github.com/hashicorp/hcl/v2` has been updated from `2.24.0` to `2.25.0` ([#39](https://github.com/sreallymatt/changeloggy/pull/39))
+
 ## v0.3.0 (September 21, 2026)
 
 Improvements:
