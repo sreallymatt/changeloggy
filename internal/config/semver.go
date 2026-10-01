@@ -25,8 +25,7 @@ func (c *Config) NextVersion() (string, error) {
 		return "", err
 	}
 
-	// TODO: option to omit `v` prefix
-	return "v" + bumped.String(), nil
+	return bumped.String(), nil
 }
 
 func (c *Config) latestVersion() (*semver.Version, error) {
