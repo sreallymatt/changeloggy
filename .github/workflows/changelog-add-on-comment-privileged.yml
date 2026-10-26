@@ -52,7 +52,7 @@ jobs:
           go-version-file: .go-version
 
       - name: Install changeloggy
-        run: go install github.com/sreallymatt/changeloggy@v0.1.0
+        run: go install github.com/sreallymatt/changeloggy@v0.3.1
 
       - name: Parse and add changelog entries
         env:

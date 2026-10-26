@@ -24,12 +24,12 @@ jobs:
           go-version-file: .go-version
 
       - name: Install changeloggy
-        run: go install github.com/sreallymatt/changeloggy@v0.1.0
+        run: go install github.com/sreallymatt/changeloggy@v0.3.1
 
       - name: Check changelog entry
         if: |
           !contains(github.event.pull_request.labels.*.name, 'no-changelog-needed') &&
-          !contains(github.event.pull_request.labels.*.name, 'github-actions')
+          !contains(github.event.pull_request.labels.*.name, 'github_actions')
         id: check
         run: changeloggy check --pr ${{ github.event.pull_request.number }}
 
