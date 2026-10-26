@@ -39,7 +39,7 @@ jobs:
           mkdir -p artifacts
           echo "${{ github.event.pull_request.number }}" > artifacts/pr-number
 
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: success()
         with:
           name: changelog-check-${{ github.event.pull_request.number }}-${{ github.run_id }}
@@ -50,7 +50,7 @@ jobs:
         run: |
           changeloggy types > artifacts/types-table
 
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: failure() && steps.check.outcome == 'failure'
         with:
           name: changelog-check-failed-${{ github.event.pull_request.number }}-${{ github.run_id }}
